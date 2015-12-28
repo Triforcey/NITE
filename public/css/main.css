@@ -1,0 +1,41 @@
+body {
+	background: #230082;
+}
+div#toolbar {
+	position: fixed;
+	top: 10px;
+	right: 10px;
+	left: 10px;
+	height: 40px;
+	background: #072C8F;
+	overflow-x: auto;
+	overflow-y: hidden;
+	white-space: nowrap;
+	padding: 10px;
+}
+div#messages {
+	position: fixed;
+	top: 80px;
+	right: 10px;
+	bottom: 10px;
+	left: 10px;
+	overflow: auto;
+	background: #560899;
+	clear: both;
+	padding: 10px;
+}
+button {
+	background: #0000ff;
+	border: none;
+	margin-left: 8px;
+}
+button#clear {
+	float: right;
+}
+button#image {
+	float: right;
+}
+form {
+	margin: 0px;
+	padding: 0px;
+}
