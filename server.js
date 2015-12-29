@@ -14,9 +14,9 @@ var htmlEncode = require('htmlencode').htmlEncode;
 function save(msg, encode) {
 	var messages = JSON.parse(fs.readFileSync('data.json'));
 	msg = JSON.parse(msg);
-	if(!encode) {
+	if(!encode && msg.data.toLowerCase() !== 'blobfish') {
 		msg.data = htmlEncode(msg.data);
-	}
+	} else if(msg.data.toLowerCase() === 'blobfish') msg.data = '<img src="images/blobfish.jpg" width="360px" height="300px">';
 	messages.push(msg);
 	while (messages.length > 50) {
 		if(typeof messages[0].path != 'undefined') {
@@ -32,8 +32,8 @@ if (!fs.existsSync('data.json')) {
 	fs.writeFileSync('data.json', '[]');
 }
 
-if(!fs.existsSync('uploads/images')) {
-	fs.mkdirSync('uploads/images');
+if(!fs.existsSync('uploads/chat-images')) {
+	fs.mkdirSync('uploads/chat-images');
 }
 
 io.emit('update', fs.readFileSync('data.json').toString());
@@ -61,7 +61,7 @@ app.post('/image-upload', upload.single('image'), function(req, res) {
 		}
 		var name = req.file.originalname;
 		var i = 0;
-		if (fs.existsSync('uploads/images' + name)) {
+		if (fs.existsSync('uploads/chat-images/' + name)) {
 			function construct(array) {
 				var str = '';
 				for (var i = 0; i < array.length; i++) {
@@ -76,7 +76,7 @@ app.post('/image-upload', upload.single('image'), function(req, res) {
 				name = name.split('.');
 				name.splice(name.length - 1, 0, i);
 				i++;
-				while (fs.existsSync('uploads/images' + construct(name))) {
+				while (fs.existsSync('uploads/chat-images/' + construct(name))) {
 					name[name.length - 2] = i;
 					i++;
 				}
@@ -84,7 +84,7 @@ app.post('/image-upload', upload.single('image'), function(req, res) {
 			} else {
 				name = [name, i];
 				i++;
-				while (fs.existsSync('uploads/images' + construct(name))) {
+				while (fs.existsSync('uploads/chat-images/' + construct(name))) {
 					name[1] = i;
 					i++;
 				}
@@ -92,9 +92,9 @@ app.post('/image-upload', upload.single('image'), function(req, res) {
 			}
 		}
 		//fs.writeFileSync('uploads/' + name, data);
-		fs.writeFileSync('uploads/images/' + name, data);
+		fs.writeFileSync('uploads/chat-images/' + name, data);
 		fs.unlinkSync(path);
-		var msg = JSON.stringify({name: req.body.name, data: '<img src="images/' + name + '">', path: 'uploads/images/' + name});
+		var msg = JSON.stringify({name: req.body.name, data: '<img src="chat-images/' + name + '">', path: 'uploads/chat-images/' + name});
 		save(msg, true);
 		res.send('<html><script>localStorage.close = "true"</script></html>');
 	});
@@ -119,8 +119,8 @@ io.on('connection', function(ws) {
 		if (msg === 'clear') {
 			fs.writeFileSync('data.json', '[]');
 			io.emit('clear', true);
-			rmdir.sync('uploads/images');
-			fs.mkdirSync('uploads/images');
+			rmdir.sync('uploads/chat-images');
+			fs.mkdirSync('uploads/chat-images');
 		}
 	});
 });
