@@ -51,7 +51,9 @@ app.get('/', function(req, res) {
 
 app.get('/image/:name', function(req, res) {
 	var file = fs.readFileSync('image-upload.html').toString();
-	file = file.replace('[name]', req.params.name);
+	while(file.indexOf('[name]') > -1) {
+		file = file.replace('[name]', req.params.name);
+	}
 	res.send(file);
 });
 
@@ -101,6 +103,12 @@ app.post('/image-upload', upload.single('image'), function(req, res) {
 		save(msg, true);
 		res.send('<html><script>localStorage.close = "true"</script></html>');
 	});
+});
+
+app.post('/image-url', function(req, res) {
+	var msg = JSON.stringify({name: req.body.name, data: '<img src="' + req.body.url + '">'});
+	save(msg, true);
+	res.send('<html><script>localStorage.close = "true"</script></html>');
 });
 
 io.on('connection', function(ws) {
