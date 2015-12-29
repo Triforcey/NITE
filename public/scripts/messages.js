@@ -58,6 +58,7 @@ $(function() {
 	}
 
 	$('#image').click(function() {
+		$('#message').focus();
 		var uploadWindow = window.open('image/' + $('#name').val(), 'Image Upload', 'width=1000px height=1000px');
 		localStorage.close = 'false';
 		var loop = setInterval(function() {
