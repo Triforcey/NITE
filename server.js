@@ -14,9 +14,12 @@ var htmlEncode = require('htmlencode').htmlEncode;
 function save(msg, encode) {
 	var messages = JSON.parse(fs.readFileSync('data.json'));
 	msg = JSON.parse(msg);
-	if(!encode && msg.data.toLowerCase() !== 'blobfish') {
+	if(!encode && ['blobfish', 'asher', 'po', 'jingle'].indexOf(msg.data.toLowerCase()) == -1) {
 		msg.data = htmlEncode(msg.data);
 	} else if(msg.data.toLowerCase() === 'blobfish') msg.data = '<img src="images/blobfish.jpg" width="360px" height="300px">';
+	else if(msg.data.toLowerCase() === 'asher') msg.data = '<img src="images/asher.jpg" width="400px" height="296px">';
+	else if(msg.data.toLowerCase() === 'po') msg.data = '<img src="images/po.jpg" width="400px" height="296px">';
+	else if(msg.data.toLowerCase() === 'jingle') msg.data = '<img src="images/jingle.jpg" width="400px" height="296px">';
 	messages.push(msg);
 	while (messages.length > 50) {
 		if(typeof messages[0].path != 'undefined') {
