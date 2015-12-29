@@ -57,7 +57,6 @@ app.post('/image-upload', upload.single('image'), function(req, res) {
 			console.log(err);
 			throw err;
 		}
-		console.log(req.file);
 		var name = req.file.originalname;
 		var i = 0;
 		if (fs.existsSync('uploads/images' + name)) {

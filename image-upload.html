@@ -1,11 +1,26 @@
 <html>
 	<style></style>
-	<head></head>
+	<head>
+		<link rel="stylesheet" href="../css/main.css">
+		<script src="../scripts/jquery-1.11.3.min.js"></script>
+	</head>
 	<body>
 		<form action="/image-upload" method="post" enctype="multipart/form-data">
-			<input type="file" name="image">
+			<input id="upload" type="file" name="image" onchange="update()" hidden>
+			<button id="file" type="button">Select Image</button>
+			<p id="output">loading...</p>
 			<button type="submit" name="name" value="[name]">Send</button>
 		</form>
 	</body>
-	<script></script>
+	<script>
+		function update() {
+			var name = $('#upload').val();
+			name = name.split('\\');
+			name = name[name.length - 1];
+			$('#output').html(name);
+		}
+		$('#file').click(function() {
+			$('#upload').trigger('click');
+		});
+	</script>
 </html>
