@@ -36,6 +36,8 @@ if(!fs.existsSync('uploads/images')) {
 	fs.mkdirSync('uploads/images');
 }
 
+io.emit('update', fs.readFileSync('data.json').toString());
+
 app.use(express.static('public'));
 
 app.use(express.static('uploads'));
