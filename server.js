@@ -12,6 +12,8 @@ var rmdir = require('rimraf');
 var htmlEncode = require('htmlencode').htmlEncode;
 var request = require('request');
 
+var giphyReserve = [];
+
 function save(msg, encode) {
 	var messages = JSON.parse(fs.readFileSync('data.json'));
 	msg = JSON.parse(msg);
@@ -152,11 +154,13 @@ io.on('connection', function(ws) {
 					var gif = Math.floor(Math.random() * data.data.length);
 					var embedLink = data.data[gif].images.fixed_width;
 					var i = 0;
-					while(fs.existsSync('uploads/giphy/' + i + '.gif')) {
+					while(fs.existsSync('uploads/giphy/' + i + '.gif') || giphyReserve.indexOf(i) > -1) {
 						i++;
 					}
+					giphyReserve.push(i);
 					var stream = request(embedLink.url).pipe(fs.createWriteStream('uploads/giphy/' + i + '.gif'));
 					stream.on('finish', function() {
+						giphyReserve.splice(giphyReserve.indexOf(i), 1);
 						msg.path = 'uploads/giphy/' + i + '.gif';
 						msg.data = '<img src="' + 'giphy/' + i + '.gif' + '" width="' + embedLink.width + '" height="' + embedLink.height + '">';
 						msg = JSON.stringify(msg);
