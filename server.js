@@ -42,7 +42,7 @@ if(!fs.existsSync('uploads/chat-images')) {
 	fs.mkdirSync('uploads/chat-images');
 }
 
-if(!fs.existsSync('public/giphy')) {
+if(!fs.existsSync('uploads/giphy')) {
 	fs.mkdirSync('uploads/giphy');
 }
 
@@ -162,7 +162,7 @@ io.on('connection', function(ws) {
 					stream.on('finish', function() {
 						giphyReserve.splice(giphyReserve.indexOf(i), 1);
 						msg.path = 'uploads/giphy/' + i + '.gif';
-						msg.data = '<img src="' + 'giphy/' + i + '.gif' + '" width="' + embedLink.width + '" height="' + embedLink.height + '">';
+						msg.data = '<img src="' + 'giphy/' + i + '.gif?stamp=' + Date.now() + '" width="' + embedLink.width + '" height="' + embedLink.height + '">';
 						msg = JSON.stringify(msg);
 						save(msg, true);
 					});
