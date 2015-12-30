@@ -137,7 +137,7 @@ io.on('connection', function(ws) {
 	});
 	ws.on('giphy', function(msg) {
 		msg = JSON.parse(msg);
-		var search = 'http://api.giphy.com/v1/gifs/search?q=[search]&api_key=dc6zaTOxFJmzC&limit=100&rating=y';
+		var search = 'http://api.giphy.com/v1/gifs/search?q=[search]&api_key=dc6zaTOxFJmzC&limit=100&rating=g';
 		search = search.replace('[search]', encodeURIComponent(msg.data));
 		request.get(search, function(err, res, body) {
 			if(!err && res.statusCode == 200) {
