@@ -10,6 +10,7 @@ var multer = require('multer');
 var upload = multer({dest: 'uploads'});
 var rmdir = require('rimraf');
 var htmlEncode = require('htmlencode').htmlEncode;
+var request = require('request');
 
 function save(msg, encode) {
 	var messages = JSON.parse(fs.readFileSync('data.json'));
@@ -133,6 +134,23 @@ io.on('connection', function(ws) {
 			rmdir.sync('uploads/chat-images');
 			fs.mkdirSync('uploads/chat-images');
 		}
+	});
+	ws.on('giphy', function(msg) {
+		msg = JSON.parse(msg);
+		var search = 'http://api.giphy.com/v1/gifs/search?q=[search]&api_key=dc6zaTOxFJmzC&limit=100&rating=g';
+		search = search.replace('[search]', encodeURIComponent(msg.data));
+		request.get(search, function(err, res, body) {
+			if(!err && res.statusCode == 200) {
+				var data = JSON.parse(body);
+				if(data.data.length > 0) {
+					var gif = Math.floor(Math.random() * data.data.length);
+					var embedLink = data.data[gif].images.fixed_width;
+					msg.data = '<img src="' + embedLink.url + '" width="' + embedLink.width + '" height="' + embedLink.height + '">';
+					msg = JSON.stringify(msg);
+					save(msg, true);
+				}
+			}
+		});
 	});
 });
 

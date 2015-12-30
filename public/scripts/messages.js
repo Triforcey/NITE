@@ -1,4 +1,4 @@
-var ws = io.connect('http://' + window.location.hostname);
+var io = io.connect('http://' + window.location.hostname);
 
 $(function() {
 	$('#message').keydown(function(e) {
@@ -8,12 +8,12 @@ $(function() {
 			message.name = $('#name').val();
 			message.data = $('#message').val();
 			message.date = date.getMonth() + '/' + date.getDate() + '/' + date.getFullYear();
-			ws.emit('message', JSON.stringify(message));
+			io.emit('message', JSON.stringify(message));
 			$('#message').val('');
 		}
 	});
 
-	ws.on('update', function(msg) {
+	io.on('update', function(msg) {
 		msg = JSON.parse(msg);
 		var messages = '';
 		for (var i = msg.length - 1; i >= 0; i--) {
@@ -35,17 +35,17 @@ $(function() {
 		$('#messages').html(messages);
 	});
 
-	ws.emit('message', 'update');
+	io.emit('message', 'update');
 
 	$('#clear').click(function() {
 		$('#message').focus();
-		ws.emit('message', 'clear');
+		io.emit('message', 'clear');
 	});
 
-	ws.on('clear', function(msg) {
+	io.on('clear', function(msg) {
 		if (msg) {
 			$('#messages').html('');
-			ws.emit('message', 'update');
+			io.emit('message', 'update');
 		}
 	});
 
@@ -67,5 +67,13 @@ $(function() {
 				clearInterval(loop);
 			}
 		});
+	});
+
+	$('#giphy').keydown(function(e) {
+		if(e.which == 13) {
+			var msg = {name: $('#name').val(), data: $('#giphy').val()};
+			io.emit('giphy', JSON.stringify(msg));
+			$('#giphy').val('');
+		}
 	});
 });
