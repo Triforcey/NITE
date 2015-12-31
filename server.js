@@ -46,7 +46,7 @@ if(!fs.existsSync('uploads/giphy')) {
 	fs.mkdirSync('uploads/giphy');
 }
 
-io.emit('update', fs.readFileSync('data.json').toString());
+//io.emit('update', fs.readFileSync('data.json').toString());
 
 app.use(express.static('public'));
 
@@ -106,7 +106,7 @@ app.post('/image-upload', upload.single('image'), function(req, res) {
 		//fs.writeFileSync('uploads/' + name, data);
 		fs.writeFileSync('uploads/chat-images/' + name, data);
 		fs.unlinkSync(path);
-		var msg = JSON.stringify({name: req.body.name, data: '<img src="chat-images/' + name + '">', path: 'uploads/chat-images/' + name});
+		var msg = JSON.stringify({name: req.body.name, data: '<img src="chat-images/' + name + '?stamp=' + Date.now() + '">', path: 'uploads/chat-images/' + name});
 		save(msg, true);
 		res.send('<html><script>localStorage.close = "true"</script></html>');
 	});
