@@ -56,10 +56,13 @@ app.get('/', function(req, res) {
 	res.sendFile('index.html', {root: __dirname});
 });
 
-app.get('/image/:name', function(req, res) {
+app.get('/image/:name/:date', function(req, res) {
 	var file = fs.readFileSync('image-upload.html').toString();
-	while(file.indexOf('[name]') > -1) {
+	while (file.indexOf('[name]') > -1) {
 		file = file.replace('[name]', req.params.name);
+	}
+	while (file.indexOf('[date]') > -1) {
+		file = file.replace('[date]', req.params.date);
 	}
 	res.send(file);
 });
@@ -106,14 +109,14 @@ app.post('/image-upload', upload.single('image'), function(req, res) {
 		//fs.writeFileSync('uploads/' + name, data);
 		fs.writeFileSync('uploads/chat-images/' + name, data);
 		fs.unlinkSync(path);
-		var msg = JSON.stringify({name: req.body.name, data: '<img src="chat-images/' + name + '?stamp=' + Date.now() + '">', path: 'uploads/chat-images/' + name});
+		var msg = JSON.stringify({name: req.body.name, data: '<img src="chat-images/' + name + '?stamp=' + Date.now() + '">', path: 'uploads/chat-images/' + name, date: req.body.date});
 		save(msg, true);
 		res.send('<html><script>localStorage.close = "true"</script></html>');
 	});
 });
 
 app.post('/image-url', function(req, res) {
-	var msg = JSON.stringify({name: req.body.name, data: '<img src="' + req.body.url + '">'});
+	var msg = JSON.stringify({name: req.body.name, data: '<img src="' + req.body.url + '">', date: req.body.date});
 	save(msg, true);
 	res.send('<html><script>localStorage.close = "true"</script></html>');
 });

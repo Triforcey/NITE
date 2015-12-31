@@ -1,13 +1,17 @@
 var io = io.connect('http://' + window.location.hostname);
 
+function getDate() {
+	var date = new Date();
+	return date.getMonth() + '/' + date.getDate() + '/' + date.getFullYear() + ' ' + date.getHours() + ':' + date.getMinutes();
+}
+
 $(function() {
 	$('#message').keydown(function(e) {
 		if (e.which == 13) {
-			var date = new Date();
 			var message = {};
 			message.name = $('#name').val();
 			message.data = $('#message').val();
-			message.date = date.getMonth() + '/' + date.getDate() + '/' + date.getFullYear();
+			message.date = getDate();
 			io.emit('message', JSON.stringify(message));
 			$('#message').val('');
 		}
@@ -59,7 +63,7 @@ $(function() {
 
 	$('#image').click(function() {
 		$('#message').focus();
-		var uploadWindow = window.open('image/' + $('#name').val(), 'Image Upload', 'width=1000px height=1000px');
+		var uploadWindow = window.open('image/' + $('#name').val() + '/' + encodeURIComponent(getDate()), 'Image Upload', 'width=1000px height=1000px');
 		localStorage.close = 'false';
 		var loop = setInterval(function() {
 			if(localStorage.close == 'true') {
@@ -71,7 +75,7 @@ $(function() {
 
 	$('#giphy').keydown(function(e) {
 		if(e.which == 13) {
-			var msg = {name: $('#name').val(), data: $('#giphy').val()};
+			var msg = {name: $('#name').val(), data: $('#giphy').val(), date: getDate()};
 			io.emit('giphy', JSON.stringify(msg));
 			$('#giphy').val('');
 		}

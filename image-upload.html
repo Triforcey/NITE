@@ -3,18 +3,20 @@
 	<head>
 		<title>Image Upload</title>
 		<link rel="icon" href="../images/favicon.ico">
-		<link rel="stylesheet" href="../css/main.css">
-		<script src="../scripts/jquery-1.11.3.min.js"></script>
+		<link rel="stylesheet" href="../../../css/main.css">
+		<script src="../../../scripts/jquery-1.11.3.min.js"></script>
 	</head>
 	<body>
 		<form action="/image-upload" method="post" enctype="multipart/form-data">
 			<input id="upload" type="file" name="image" onchange="update()" hidden>
 			<button id="file" type="button">Select Image</button>
 			<p id="output">No file selected</p>
+			<input name="date" value="[date]" hidden>
 			<button type="submit" name="name" value="[name]">Send</button>
 		</form>
 		<form action="/image-url" method="post" style="margin-top: 15px;">
 			<input autocomplete="off" name="url" placeholder="from url">
+			<input name="date" value="[date]" hidden>
 			<button type="submit" name="name" value="[name]">Send</button>
 		</form>
 	</body>
