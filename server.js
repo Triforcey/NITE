@@ -12,6 +12,8 @@ var rmdir = require('rimraf');
 var htmlEncode = require('htmlencode').htmlEncode;
 var request = require('request');
 
+var giphyReserve = [];
+
 function save(msg, encode) {
 	var messages = JSON.parse(fs.readFileSync('data.json'));
 	msg = JSON.parse(msg);
@@ -32,7 +34,7 @@ function save(msg, encode) {
 	io.emit('update', fs.readFileSync('data.json').toString());
 }
 
-if (!fs.existsSync('data.json')) {
+if(!fs.existsSync('data.json')) {
 	fs.writeFileSync('data.json', '[]');
 }
 
@@ -40,7 +42,11 @@ if(!fs.existsSync('uploads/chat-images')) {
 	fs.mkdirSync('uploads/chat-images');
 }
 
-io.emit('update', fs.readFileSync('data.json').toString());
+if(!fs.existsSync('uploads/giphy')) {
+	fs.mkdirSync('uploads/giphy');
+}
+
+//io.emit('update', fs.readFileSync('data.json').toString());
 
 app.use(express.static('public'));
 
@@ -100,7 +106,7 @@ app.post('/image-upload', upload.single('image'), function(req, res) {
 		//fs.writeFileSync('uploads/' + name, data);
 		fs.writeFileSync('uploads/chat-images/' + name, data);
 		fs.unlinkSync(path);
-		var msg = JSON.stringify({name: req.body.name, data: '<img src="chat-images/' + name + '">', path: 'uploads/chat-images/' + name});
+		var msg = JSON.stringify({name: req.body.name, data: '<img src="chat-images/' + name + '?stamp=' + Date.now() + '">', path: 'uploads/chat-images/' + name});
 		save(msg, true);
 		res.send('<html><script>localStorage.close = "true"</script></html>');
 	});
@@ -133,6 +139,8 @@ io.on('connection', function(ws) {
 			io.emit('clear', true);
 			rmdir.sync('uploads/chat-images');
 			fs.mkdirSync('uploads/chat-images');
+			rmdir.sync('uploads/giphy');
+			fs.mkdirSync('uploads/giphy');
 		}
 	});
 	ws.on('giphy', function(msg) {
@@ -145,9 +153,19 @@ io.on('connection', function(ws) {
 				if(data.data.length > 0) {
 					var gif = Math.floor(Math.random() * data.data.length);
 					var embedLink = data.data[gif].images.fixed_width;
-					msg.data = '<img src="' + embedLink.url + '" width="' + embedLink.width + '" height="' + embedLink.height + '">';
-					msg = JSON.stringify(msg);
-					save(msg, true);
+					var i = 0;
+					while(fs.existsSync('uploads/giphy/' + i + '.gif') || giphyReserve.indexOf(i) > -1) {
+						i++;
+					}
+					giphyReserve.push(i);
+					var stream = request(embedLink.url).pipe(fs.createWriteStream('uploads/giphy/' + i + '.gif'));
+					stream.on('finish', function() {
+						giphyReserve.splice(giphyReserve.indexOf(i), 1);
+						msg.path = 'uploads/giphy/' + i + '.gif';
+						msg.data = '<img src="' + 'giphy/' + i + '.gif?stamp=' + Date.now() + '" width="' + embedLink.width + '" height="' + embedLink.height + '">';
+						msg = JSON.stringify(msg);
+						save(msg, true);
+					});
 				}
 			}
 		});
