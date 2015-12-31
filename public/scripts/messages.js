@@ -2,7 +2,7 @@ var io = io.connect('http://' + window.location.hostname);
 
 function getDate() {
 	var date = new Date();
-	return date.getMonth() + '/' + date.getDate() + '/' + date.getFullYear() + ' ' + date.getHours() + ':' + date.getMinutes();
+	return date.getMonth() + 1 + '/' + date.getDate() + '/' + date.getFullYear() + ' ' + date.getHours() + ':' + date.getMinutes();
 }
 
 $(function() {

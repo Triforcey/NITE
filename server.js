@@ -13,19 +13,20 @@ var htmlEncode = require('htmlencode').htmlEncode;
 var request = require('request');
 
 var giphyReserve = [];
+var imageURLReserve = [];
 
 function save(msg, encode) {
 	var messages = JSON.parse(fs.readFileSync('data.json'));
 	msg = JSON.parse(msg);
-	if(!encode && ['blobfish', 'asher', 'po', 'jingle'].indexOf(msg.data.toLowerCase()) == -1) {
+	if (!encode && ['blobfish', 'asher', 'po', 'jingle'].indexOf(msg.data.toLowerCase()) == -1) {
 		msg.data = htmlEncode(msg.data);
-	} else if(msg.data.toLowerCase() === 'blobfish') msg.data = '<img src="images/blobfish.jpg" width="360px" height="300px">';
-	else if(msg.data.toLowerCase() === 'asher') msg.data = '<img src="images/asher.jpg" width="400px" height="296px">';
-	else if(msg.data.toLowerCase() === 'po') msg.data = '<img src="images/po.jpg" width="400px" height="296px">';
-	else if(msg.data.toLowerCase() === 'jingle') msg.data = '<img src="images/jingle.jpg" width="400px" height="296px">';
+	} else if (msg.data.toLowerCase() === 'blobfish') msg.data = '<img src="images/blobfish.jpg" width="360px" height="300px">';
+	else if (msg.data.toLowerCase() === 'asher') msg.data = '<img src="images/asher.jpg" width="400px" height="296px">';
+	else if (msg.data.toLowerCase() === 'po') msg.data = '<img src="images/po.jpg" width="400px" height="296px">';
+	else if (msg.data.toLowerCase() === 'jingle') msg.data = '<img src="images/jingle.jpg" width="400px" height="296px">';
 	messages.push(msg);
 	while (messages.length > 50) {
-		if(typeof messages[0].path != 'undefined') {
+		if (typeof messages[0].path != 'undefined') {
 			fs.unlinkSync(messages[0].path);
 		}
 		messages.splice(0, 1);
@@ -34,16 +35,20 @@ function save(msg, encode) {
 	io.emit('update', fs.readFileSync('data.json').toString());
 }
 
-if(!fs.existsSync('data.json')) {
+if (!fs.existsSync('data.json')) {
 	fs.writeFileSync('data.json', '[]');
 }
 
-if(!fs.existsSync('uploads/chat-images')) {
+if (!fs.existsSync('uploads/chat-images')) {
 	fs.mkdirSync('uploads/chat-images');
 }
 
-if(!fs.existsSync('uploads/giphy')) {
+if (!fs.existsSync('uploads/giphy')) {
 	fs.mkdirSync('uploads/giphy');
+}
+
+if (!fs.existsSync('uploads/chat-images/url')) {
+	fs.mkdirSync('uploads/chat-images/url');
 }
 
 //io.emit('update', fs.readFileSync('data.json').toString());
@@ -70,7 +75,7 @@ app.get('/image/:name/:date', function(req, res) {
 app.post('/image-upload', upload.single('image'), function(req, res) {
 	var path = req.file.path;
 	fs.readFile(path, function(err, data) {
-		if(err) {
+		if (err) {
 			console.log(err);
 			throw err;
 		}
@@ -116,8 +121,17 @@ app.post('/image-upload', upload.single('image'), function(req, res) {
 });
 
 app.post('/image-url', function(req, res) {
-	var msg = JSON.stringify({name: req.body.name, data: '<img src="' + req.body.url + '">', date: req.body.date});
-	save(msg, true);
+	var i = 0;
+	while (fs.existsSync('uploads/chat-images/url/' + i) || imageURLReserve.indexOf(i) > -1) {
+		i++;
+	}
+	imageURLReserve.push(i);
+	var stream = request(req.body.url).pipe(fs.createWriteStream('uploads/chat-images/url/' + i));
+	stream.on('finish', function() {
+		imageURLReserve.splice(imageURLReserve.indexOf(i), 1);
+		var msg = JSON.stringify({name: req.body.name, data: '<img src="' + 'chat-images/url/' + i + '">', date: req.body.date, path: 'uploads/chat-images/url/' + i});
+		save(msg, true);
+	});
 	res.send('<html><script>localStorage.close = "true"</script></html>');
 });
 
@@ -133,17 +147,21 @@ io.on('connection', function(ws) {
 			} catch(err) {
 				test = false;
 			}
-			if(test) {
+			if (test) {
 				save(msg);
 			}
 		}
 		if (msg === 'clear') {
 			fs.writeFileSync('data.json', '[]');
 			io.emit('clear', true);
-			rmdir.sync('uploads/chat-images');
+			rmdir.sync('uploads');
+			fs.mkdirSync('uploads');
+			//rmdir.sync('uploads/chat-images');
 			fs.mkdirSync('uploads/chat-images');
-			rmdir.sync('uploads/giphy');
+			//rmdir.sync('uploads/giphy');
 			fs.mkdirSync('uploads/giphy');
+			//rmdir.sync('uploads/chat-images/url');
+			fs.mkdirSync('uploads/chat-images/url');
 		}
 	});
 	ws.on('giphy', function(msg) {
@@ -151,13 +169,13 @@ io.on('connection', function(ws) {
 		var search = 'http://api.giphy.com/v1/gifs/search?q=[search]&api_key=dc6zaTOxFJmzC&limit=100&rating=g';
 		search = search.replace('[search]', encodeURIComponent(msg.data));
 		request.get(search, function(err, res, body) {
-			if(!err && res.statusCode == 200) {
+			if (!err && res.statusCode == 200) {
 				var data = JSON.parse(body);
-				if(data.data.length > 0) {
+				if (data.data.length > 0) {
 					var gif = Math.floor(Math.random() * data.data.length);
 					var embedLink = data.data[gif].images.fixed_width;
 					var i = 0;
-					while(fs.existsSync('uploads/giphy/' + i + '.gif') || giphyReserve.indexOf(i) > -1) {
+					while (fs.existsSync('uploads/giphy/' + i + '.gif') || giphyReserve.indexOf(i) > -1) {
 						i++;
 					}
 					giphyReserve.push(i);
