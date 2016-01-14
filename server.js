@@ -11,6 +11,7 @@ var upload = multer({dest: 'uploads'});
 var rmdir = require('rimraf');
 var htmlEncode = require('htmlencode').htmlEncode;
 var request = require('request');
+var youtubeDl = require('youtube-dl');
 
 var giphyReserve = [];
 var imageURLReserve = [];
@@ -169,7 +170,7 @@ io.on('connection', function(ws) {
 		msg = JSON.parse(msg);
 		var search = 'http://api.giphy.com/v1/gifs/search?q=[search]&api_key=dc6zaTOxFJmzC&limit=100&rating=g';
 		search = search.replace('[search]', encodeURIComponent(msg.data));
-		request.get(search, function(err, res, body) {
+		request(search, function(err, res, body) {
 			if (!err && res.statusCode == 200) {
 				var data = JSON.parse(body);
 				if (data.data.length > 0) {
@@ -189,6 +190,27 @@ io.on('connection', function(ws) {
 						save(msg, true);
 					});
 				}
+			}
+		});
+	});
+	ws.on('youtube', function(msg) {
+		msg = JSON.parse(msg);
+		var video = youtubeDl(msg.data);
+		request(msg.data, function(err, res, body) {
+			if(!err && res.statusCode == 200) {
+				var i = 0;
+				while(fs.existsSync('uploads/chat-images/' + i) || imageURLReserve.indexOf(i) > -1) {
+					i++;
+				}
+				imageURLReserve.push(i);
+				video.pipe(fs.createWriteStream('uploads/chat-images/' + i));
+				video.on('end', function() {
+					imageURLReserve.splice(imageURLReserve.indexOf(i), 1);
+					msg.path = 'uploads/chat-images/' + i;
+					msg.data = '<video><source src="chat-images/' + i + '" type="video/mp4"></video>';
+					msg = JSON.stringify(msg);
+					save(msg, true);
+				});
 			}
 		});
 	});

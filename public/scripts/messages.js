@@ -80,4 +80,12 @@ $(function() {
 			$('#giphy').val('');
 		}
 	});
+
+	$('#youtube').keydown(function(e) {
+		if(e.which == 13) {
+			var msg = {name: $('#name').val(), data: $('#youtube').val(), date: getDate()};
+			io.emit('youtube', JSON.stringify(msg));
+			$('#youtube').val('');
+		}
+	});
 });

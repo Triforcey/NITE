@@ -12,7 +12,8 @@
     "multer": "^1.1.0",
     "rimraf": "^2.5.0",
     "htmlencode": "^0.0.4",
-    "request": "^2.67.0"
+    "request": "^2.67.0",
+    "youtube-dl": "^1.10.5"
   },
   "devDependencies": {},
   "scripts": {
