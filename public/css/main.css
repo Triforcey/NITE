@@ -42,3 +42,7 @@ form {
 input#giphy {
 	float: right;
 }
+input#youtube {
+	float: right;
+	margin-right: 8px;
+}
