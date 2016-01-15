@@ -207,7 +207,8 @@ io.on('connection', function(ws) {
 				video.on('end', function() {
 					imageURLReserve.splice(imageURLReserve.indexOf(i), 1);
 					msg.path = 'uploads/chat-images/' + i;
-					msg.data = '<video controls height="500px"><source src="chat-images/' + i + '?stamp=' + Date.now() + '" type="video/mp4"></video>';
+					var videoString = '<video controls height=\\"500px\\"><source src=\\"chat-images/' + i + '\\"></video>';
+					msg.data = "<a href='javascript: var video = window.open(\"\", \"\", \"width=1000px, height=700px\"); video.document.write(" + '"' + videoString + '"' + ")' class='video'>video</a>";
 					msg = JSON.stringify(msg);
 					save(msg, true);
 				});
