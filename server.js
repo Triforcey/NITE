@@ -197,7 +197,7 @@ io.on('connection', function(ws) {
 		msg = JSON.parse(msg);
 		var video = youtubeDl(msg.data);
 		request(msg.data, function(err, res, body) {
-			if(!err && res.statusCode == 200) {
+			if(!err && res.statusCode == 200 && msg.data.indexOf('https://www.youtube.com/watch?v=') == 0) {
 				var i = 0;
 				while(fs.existsSync('uploads/chat-images/' + i) || imageURLReserve.indexOf(i) > -1) {
 					i++;
