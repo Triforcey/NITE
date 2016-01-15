@@ -75,8 +75,8 @@ app.get('/image/:name/:date', function(req, res) {
 });
 
 app.get('/video/:id', function(req, res) {
-	var videoString = '<video controls width="100%" height="100%" style="position: fixed; top: 0; left: 0;"><source src="/chat-images/' + req.params.id + '"></video>';
-	res.send('<html style="background: black;"><script>var video = window.open(\'\', \'\', \'width=1000px, height=500px\'); video.document.write(\'' + videoString + '\'); window.location = \'/\';</script></html>');
+	var videoString = '<video controls width="100%" height="100%"style="position: fixed; top: 0; left: 0; background: black;"><source src="/chat-images/' + req.params.id + '"></video>';
+	res.send('<html><body>Opening video... If you\'re still seeing this after 3 seconds, it\'s possible the pop-up has been blocked.</body><script>var video = window.open(\'\', \'\', \'width=1000px, height=500px\'); video.document.write(\'' + videoString + '\'); window.location = \'/\';</script></html>');
 });
 
 app.post('/image-upload', upload.single('image'), function(req, res) {
