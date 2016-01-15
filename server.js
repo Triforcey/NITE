@@ -74,6 +74,11 @@ app.get('/image/:name/:date', function(req, res) {
 	res.send(file);
 });
 
+app.get('/video/:id', function(req, res) {
+	var videoString = '<video controls width="100%" height="100%" style="position: fixed; top: 0; left: 0;"><source src="/chat-images/' + req.params.id + '"></video>';
+	res.send('<html style="background: black;"><script>var video = window.open(\'\', \'\', \'width=1000px, height=500px\'); video.document.write(\'' + videoString + '\'); window.location = \'/\';</script></html>');
+});
+
 app.post('/image-upload', upload.single('image'), function(req, res) {
 	var path = req.file.path;
 	fs.readFile(path, function(err, data) {
@@ -207,8 +212,9 @@ io.on('connection', function(ws) {
 				video.on('end', function() {
 					imageURLReserve.splice(imageURLReserve.indexOf(i), 1);
 					msg.path = 'uploads/chat-images/' + i;
-					var videoString = '<video controls height=\\"500px\\"><source src=\\"chat-images/' + i + '\\"></video>';
-					msg.data = "<a href='javascript: var video = window.open(\"\", \"\", \"width=1000px, height=700px\"); video.document.write(" + '"' + videoString + '"' + ")' class='video'>video</a>";
+					//var videoString = '<video controls height=\\"500px\\"><source src=\\"chat-images/' + i + '\\"></video>';
+					//msg.data = "<a href='javascript: var video = window.open(\"\", \"\", \"width=1000px, height=700px\"); video.document.write(" + '"' + videoString + '"' + ")' class='video'>video</a>";
+					msg.data = '<a href="/video/' + i + '?stamp=' + Date.now() + '" class="video">view video</a>';
 					msg = JSON.stringify(msg);
 					save(msg, true);
 				});
