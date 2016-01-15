@@ -207,7 +207,7 @@ io.on('connection', function(ws) {
 				video.on('end', function() {
 					imageURLReserve.splice(imageURLReserve.indexOf(i), 1);
 					msg.path = 'uploads/chat-images/' + i;
-					msg.data = '<video controls height="500px"><source src="chat-images/' + i + '" type="video/mp4"></video>';
+					msg.data = '<video controls height="500px"><source src="chat-images/' + i + '?stamp=' + Date.now() + '" type="video/mp4"></video>';
 					msg = JSON.stringify(msg);
 					save(msg, true);
 				});
