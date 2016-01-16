@@ -214,7 +214,7 @@ io.on('connection', function(ws) {
 					msg.path = 'uploads/chat-images/' + i;
 					//var videoString = '<video controls height=\\"500px\\"><source src=\\"chat-images/' + i + '\\"></video>';
 					//msg.data = "<a href='javascript: var video = window.open(\"\", \"\", \"width=1000px, height=700px\"); video.document.write(" + '"' + videoString + '"' + ")' class='video'>video</a>";
-					msg.data = '<a href="/video/' + i + '?stamp=' + Date.now() + '" class="video">view video</a>';
+					msg.data = '<a href="/video/' + i + '?stamp=' + Date.now() + '" target="_self" class="video">view video</a>';
 					msg = JSON.stringify(msg);
 					save(msg, true);
 				});
