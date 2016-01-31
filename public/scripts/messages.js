@@ -63,14 +63,18 @@ $(function() {
 
 	$('#image').click(function() {
 		$('#message').focus();
-		var uploadWindow = window.open('image/' + $('#name').val() + '/' + encodeURIComponent(getDate()), 'Image Upload', 'width=1000px height=1000px');
-		localStorage.close = 'false';
-		var loop = setInterval(function() {
-			if(localStorage.close == 'true') {
-				uploadWindow.close();
-				clearInterval(loop);
-			}
-		});
+		if ($('#name').val()) {
+			var uploadWindow = window.open('image/' + $('#name').val() + '/' + encodeURIComponent(getDate()), 'Image Upload', 'width=1000px height=1000px');
+			localStorage.close = 'false';
+			var loop = setInterval(function() {
+				if(localStorage.close == 'true') {
+					uploadWindow.close();
+					clearInterval(loop);
+				}
+			});
+		} else {
+			alert('Set name first!');
+		}
 	});
 
 	$('#giphy').keydown(function(e) {
