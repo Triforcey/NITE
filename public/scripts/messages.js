@@ -1,4 +1,5 @@
 var io = io.connect('http://' + window.location.hostname);
+var firstUpdate = true;
 
 function getDate() {
 	var date = new Date();
@@ -37,6 +38,14 @@ $(function() {
 			messages += div;
 		}
 		$('#messages').html(messages);
+		if (!firstUpdate && msg.length > 0) {
+			var bell = document.getElementById('bell');
+			if (bell.currentTime > 0) {
+				bell.currentTime = 0;
+			}
+			bell.play();
+		}
+		firstUpdate = false;
 	});
 
 	io.emit('message', 'update');
