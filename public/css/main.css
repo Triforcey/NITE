@@ -1,5 +1,13 @@
+@font-face {
+	font-family: defaultFont;
+	src: url(/fonts/main.ttf);
+}
 body {
 	background: #230082;
+}
+* {
+	font-family: defaultFont;
+	/*font-size: x-large;*/
 }
 div#toolbar {
 	position: fixed;
