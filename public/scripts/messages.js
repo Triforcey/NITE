@@ -73,7 +73,7 @@ $(function() {
 	$('#image').click(function() {
 		$('#message').focus();
 		if ($('#name').val()) {
-			var uploadWindow = window.open('image/' + $('#name').val() + '/' + encodeURIComponent(getDate()), 'Image Upload', 'width=1000px height=1000px');
+			var uploadWindow = window.open('image/' + $('#name').val() + '/' + encodeURIComponent(getDate()), 'Image Upload', 'width=500px height=400px');
 			localStorage.close = 'false';
 			var loop = setInterval(function() {
 				if(localStorage.close == 'true') {
