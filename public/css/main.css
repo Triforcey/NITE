@@ -1,13 +1,13 @@
 @font-face {
 	font-family: defaultFont;
-	src: url(/fonts/main.ttf);
+	src: url(/fonts/hand-written.ttf);
 }
 body {
 	background: #230082;
 }
 * {
 	font-family: defaultFont;
-	/*font-size: x-large;*/
+	font-size: xx-large;
 }
 div#toolbar {
 	position: fixed;
