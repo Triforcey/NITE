@@ -39,7 +39,7 @@
 		})();
 		document.onmousemove = function (e) {
 			var rect = canvas.getBoundingClientRect();
-			mousePos = [[e.pageX - rect.left, e.pageY - rect.top], [...mousePos[0]]];
+			mousePos = [[e.clientX - rect.left, e.clientY - rect.top], [...mousePos[0]]];
 			if (mouseDown('read') === 'yes') {
 				ctx.beginPath();
 				ctx.moveTo(...mousePos[1]);
@@ -49,12 +49,26 @@
 				ctx.stroke();
 			}
 		}
-		canvas.onmousedown = function () {
+		document.ontouchmove = function (e) {
+			e.preventDefault();
+			console.log(e.changedTouches);
+			var converter = {clientX: e.changedTouches[0].clientX, clientY: e.changedTouches[0].clientY};
+			document.onmousemove(converter);
+		}
+		canvas.onmousedown = function (e) {
 			mouseDown('yes');
+		}
+		canvas.ontouchstart = function (e) {
+			e.preventDefault();
+			mouseDown('yes');
+			console.log('New touch.');
+			var rect = canvas.getBoundingClientRect();
+			mousePos = [[e.changedTouches[0].clientX - rect.left, e.changedTouches[0].clientY - rect.top], [e.changedTouches[0].clientX - rect.left, e.changedTouches[0].clientY - rect.top]];
 		}
 		document.onmouseup = function () {
 			mouseDown('no');
 		}
+		document.ontouchend = document.onmouseup;
 		function getDate() {
 			var date = new Date();
 			return date.getMonth() + 1 + '/' + date.getDate() + '/' + date.getFullYear() + ' ' + date.getHours() + ':' + date.getMinutes();
