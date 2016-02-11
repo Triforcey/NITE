@@ -1,0 +1,69 @@
+<html>
+	<style>
+		canvas {
+			border: 1px solid;
+			cursor: crosshair;
+		}
+	</style>
+	<head>
+		<title>Canvas</title>
+		<link rel="icon" href="/images/favicon.ico">
+		<link rel="stylesheet" href="/css/main.css">
+		<script src="/socket.io/socket.io.js"></script>
+	</head>
+	<body>
+		<canvas width="500px" height="500px"></canvas>
+		<br>
+		<button onclick="ctx.clearRect(0, 0, 501, 501)">Clear</button>
+		<button onclick="sendPic()">Send</button>
+	</body>
+	<script>
+		var canvas = document.getElementsByTagName('canvas')[0];
+		var ctx = canvas.getContext('2d');
+		var mousePos = [[0, 0], [0, 0]]
+		var mouseDown = (function (e) {
+			var mouseDown = 'no';
+			return function (e) {
+				if (e === 'read') {
+					return mouseDown;
+				} else if (e === 'yes') {
+					mouseDown = 'yes';
+					return true;
+				} else if (e === 'no') {
+					mouseDown = 'no';
+					return true;
+				} else {
+					return false;
+				}
+			}
+		})();
+		document.onmousemove = function (e) {
+			var rect = canvas.getBoundingClientRect();
+			mousePos = [[e.pageX - rect.left, e.pageY - rect.top], [...mousePos[0]]];
+			if (mouseDown('read') === 'yes') {
+				ctx.beginPath();
+				ctx.moveTo(...mousePos[1]);
+				//ctx.arc(...mousePos, 3, 0, Math.PI * 2);
+				ctx.lineTo(...mousePos[0]);
+				ctx.closePath();
+				ctx.stroke();
+			}
+		}
+		canvas.onmousedown = function () {
+			mouseDown('yes');
+		}
+		document.onmouseup = function () {
+			mouseDown('no');
+		}
+		function getDate() {
+			var date = new Date();
+			return date.getMonth() + 1 + '/' + date.getDate() + '/' + date.getFullYear() + ' ' + date.getHours() + ':' + date.getMinutes();
+		}
+		var ws = io('/');
+		function sendPic() {
+			var name = '[name]';
+			var date = getDate();
+			ws.emit('canvas', {name: name, date: date, data: canvas.toDataURL()});
+		}
+	</script>
+</html>
