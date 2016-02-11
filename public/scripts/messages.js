@@ -6,8 +6,8 @@ function getDate() {
 	return date.getMonth() + 1 + '/' + date.getDate() + '/' + date.getFullYear() + ' ' + date.getHours() + ':' + date.getMinutes();
 }
 
-$(function() {
-	$('#message').keydown(function(e) {
+$(function () {
+	$('#message').keydown(function (e) {
 		if (e.which == 13) {
 			var message = {};
 			message.name = $('#name').val();
@@ -18,7 +18,7 @@ $(function() {
 		}
 	});
 
-	io.on('update', function(msg) {
+	io.on('update', function (msg) {
 		msg = JSON.parse(msg);
 		var messages = '';
 		for (var i = msg.length - 1; i >= 0; i--) {
@@ -50,19 +50,19 @@ $(function() {
 
 	io.emit('message', 'update');
 
-	$('#clear').click(function() {
+	$('#clear').click(function () {
 		$('#message').focus();
 		io.emit('message', 'clear');
 	});
 
-	io.on('clear', function(msg) {
+	io.on('clear', function (msg) {
 		if (msg) {
 			$('#messages').html('');
 			io.emit('message', 'update');
 		}
 	});
 
-	$('#name').on('input', function() {
+	$('#name').on('input', function () {
 		localStorage.name = $('#name').val();
 	});
 
@@ -70,12 +70,12 @@ $(function() {
 		$('#name').val(localStorage.name);
 	}
 
-	$('#image').click(function() {
+	$('#image').click(function () {
 		$('#message').focus();
 		if ($('#name').val()) {
-			var uploadWindow = window.open('image/' + $('#name').val() + '/' + encodeURIComponent(getDate()), 'Image Upload', 'width=500px height=400px');
+			var uploadWindow = window.open('image/' + encodeURIComponent($('#name').val()) + '/' + encodeURIComponent(getDate()), 'Image Upload', 'width=500px height=400px');
 			localStorage.close = 'false';
-			var loop = setInterval(function() {
+			var loop = setInterval(function () {
 				if(localStorage.close == 'true') {
 					uploadWindow.close();
 					clearInterval(loop);
@@ -86,7 +86,7 @@ $(function() {
 		}
 	});
 
-	$('#giphy').keydown(function(e) {
+	$('#giphy').keydown(function (e) {
 		if(e.which == 13) {
 			var msg = {name: $('#name').val(), data: $('#giphy').val(), date: getDate()};
 			io.emit('giphy', JSON.stringify(msg));
@@ -94,11 +94,15 @@ $(function() {
 		}
 	});
 
-	$('#youtube').keydown(function(e) {
+	$('#youtube').keydown(function (e) {
 		if(e.which == 13) {
 			var msg = {name: $('#name').val(), data: $('#youtube').val(), date: getDate()};
 			io.emit('youtube', JSON.stringify(msg));
 			$('#youtube').val('');
 		}
+	});
+
+	$('#canvas').click(function (e) {
+		window.open('canvas/' + encodeURIComponent($('#name').val()), 'Canvas', 'width=600px height=600px');
 	});
 });

@@ -59,11 +59,11 @@ app.use(express.static('public'));
 
 app.use(express.static('uploads'));
 
-app.get('/', function(req, res) {
+app.get('/', function (req, res) {
 	res.sendFile('index.html', {root: __dirname});
 });
 
-app.get('/image/:name/:date', function(req, res) {
+app.get('/image/:name/:date', function (req, res) {
 	var file = fs.readFileSync('image-upload.html').toString();
 	while (file.indexOf('[name]') > -1) {
 		file = file.replace('[name]', req.params.name);
@@ -74,14 +74,20 @@ app.get('/image/:name/:date', function(req, res) {
 	res.send(file);
 });
 
-app.get('/video/:id', function(req, res) {
+app.get('/video/:id', function (req, res) {
 	var videoString = '<video controls width="100%" height="100%"style="position: fixed; top: 0; left: 0; background: black;"><source src="/chat-images/' + req.params.id + '"></video>';
 	res.send('<html><body>Opening video... If you\'re still seeing this after 3 seconds, it\'s possible the pop-up has been blocked.</body><script>var video = window.open(\'\', \'\', \'width=1000px, height=500px\'); video.document.write(\'' + videoString + '\'); window.location = \'/\';</script></html>');
 });
 
-app.post('/image-upload', upload.single('image'), function(req, res) {
+app.get('/canvas/:name', function (req, res) {
+	var file = fs.readFileSync('canvas.html').toString();
+	file = file.replace('[name]', req.params.name);
+	res.send(file);
+});
+
+app.post('/image-upload', upload.single('image'), function (req, res) {
 	var path = req.file.path;
-	fs.readFile(path, function(err, data) {
+	fs.readFile(path, function (err, data) {
 		if (err) {
 			console.log(err);
 			throw err;
@@ -127,14 +133,14 @@ app.post('/image-upload', upload.single('image'), function(req, res) {
 	});
 });
 
-app.post('/image-url', function(req, res) {
+app.post('/image-url', function (req, res) {
 	var i = 0;
 	while (fs.existsSync('uploads/chat-images/url/' + i) || imageURLReserve.indexOf(i) > -1) {
 		i++;
 	}
 	imageURLReserve.push(i);
 	var stream = request(req.body.url).pipe(fs.createWriteStream('uploads/chat-images/url/' + i));
-	stream.on('finish', function() {
+	stream.on('finish', function () {
 		imageURLReserve.splice(imageURLReserve.indexOf(i), 1);
 		var msg = JSON.stringify({name: req.body.name, data: '<img src="' + 'chat-images/url/' + i + '">', date: req.body.date, path: 'uploads/chat-images/url/' + i});
 		save(msg, true);
@@ -142,9 +148,9 @@ app.post('/image-url', function(req, res) {
 	res.send('<html><script>localStorage.close = "true"</script></html>');
 });
 
-io.on('connection', function(ws) {
+io.on('connection', function (ws) {
 	console.log('New WS connection from: ' + ws.request.connection.remoteAddress + ' ID: ' + ws.id);
-	ws.on('message', function(msg) {
+	ws.on('message', function (msg) {
 		if (msg === 'update') {
 			ws.emit('update', fs.readFileSync('data.json').toString());
 		} else {
@@ -171,11 +177,11 @@ io.on('connection', function(ws) {
 			fs.mkdirSync('uploads/chat-images/url');
 		}
 	});
-	ws.on('giphy', function(msg) {
+	ws.on('giphy', function (msg) {
 		msg = JSON.parse(msg);
 		var search = 'http://api.giphy.com/v1/gifs/search?q=[search]&api_key=dc6zaTOxFJmzC&limit=100&rating=g';
 		search = search.replace('[search]', encodeURIComponent(msg.data));
-		request(search, function(err, res, body) {
+		request(search, function (err, res, body) {
 			if (!err && res.statusCode == 200) {
 				var data = JSON.parse(body);
 				if (data.data.length > 0) {
@@ -187,7 +193,7 @@ io.on('connection', function(ws) {
 					}
 					giphyReserve.push(i);
 					var stream = request(embedLink.url).pipe(fs.createWriteStream('uploads/giphy/' + i + '.gif'));
-					stream.on('finish', function() {
+					stream.on('finish', function () {
 						giphyReserve.splice(giphyReserve.indexOf(i), 1);
 						msg.path = 'uploads/giphy/' + i + '.gif';
 						msg.data = '<img src="' + 'giphy/' + i + '.gif?stamp=' + Date.now() + '" width="' + embedLink.width + '" height="' + embedLink.height + '">';
@@ -198,10 +204,10 @@ io.on('connection', function(ws) {
 			}
 		});
 	});
-	ws.on('youtube', function(msg) {
+	ws.on('youtube', function (msg) {
 		msg = JSON.parse(msg);
 		var video = youtubeDl(msg.data);
-		request(msg.data, function(err, res, body) {
+		request(msg.data, function (err, res, body) {
 			if(!err && res.statusCode == 200 && msg.data.indexOf('https://www.youtube.com/watch?v=') == 0) {
 				var i = 0;
 				while(fs.existsSync('uploads/chat-images/' + i) || imageURLReserve.indexOf(i) > -1) {
@@ -209,7 +215,7 @@ io.on('connection', function(ws) {
 				}
 				imageURLReserve.push(i);
 				video.pipe(fs.createWriteStream('uploads/chat-images/' + i));
-				video.on('end', function() {
+				video.on('end', function () {
 					imageURLReserve.splice(imageURLReserve.indexOf(i), 1);
 					msg.path = 'uploads/chat-images/' + i;
 					//var videoString = '<video controls height=\\"500px\\"><source src=\\"chat-images/' + i + '\\"></video>';
@@ -221,13 +227,18 @@ io.on('connection', function(ws) {
 			}
 		});
 	});
+	ws.on('canvas', function (msg) {
+		msg.data = '<img width="500px" height="500px" src="' + msg.data + '" alt="Sorry, but if your browser can\'t display this, you need a better browser, because I seriously doubt this is a server error.">';
+		msg = JSON.stringify(msg);
+		save(msg, true);
+	});
 });
 
-app.use(function(req, res) {
+app.use(function (req, res) {
 	res.status(404).sendFile('404.html', {root: __dirname});
 });
 
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
 	res.status(500).sendFile('500.html', {root: __dirname});
 });
 
