@@ -103,6 +103,12 @@ $(function () {
 	});
 
 	$('#canvas').click(function (e) {
-		window.open('canvas/' + encodeURIComponent($('#name').val()), 'Canvas', 'width=600px height=600px');
+		var canvas = window.open('canvas/' + encodeURIComponent($('#name').val()), 'Canvas', 'width=600px height=600px');
+		try {
+			canvas.focus();
+		} catch (err) {
+			alert('The pop-up was blocked!');
+		}
+		$('#message').focus();
 	});
 });
